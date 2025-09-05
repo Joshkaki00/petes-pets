@@ -24,11 +24,16 @@ module.exports = (app) => {
       }) ;
   });
 
-  // SEARCH PET
+// SEARCH PET
   app.get('/search', (req, res) => {
-    Pet.find().exec((err, pets) => {
-      res.render('pets-index', { pets: pets });    
-    });
+    term = new RegExp(req.query.term, 'i')  // case-insensitive regex
+
+    Pet.find({$or:[
+      {'name': term},
+      {'species': term}
+    ]}).exec((err, pets) => {
+      res.render('pets-index', { pets: pets });
+    })
   });
 
   // SHOW PET
