@@ -24,7 +24,7 @@ module.exports = (app) => {
       }) ;
   });
 
-// SEARCH PET
+  // SEARCH PET
   app.get('/search', (req, res) => {
     term = new RegExp(req.query.term, 'i')  // case-insensitive regex
 
