@@ -58,6 +58,17 @@ describe('Pets', ()  => {
         });
   });
 
+  // TEST SEARCH
+  it('should search ALL pets by name on /search GET', (done) => {
+    chai.request(server)
+        .get('/search?term=norman')
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.should.be.html;
+          done();
+        });
+  });
+
   // TEST SHOW
   it('should show a SINGLE pet on /pets/<id> GET', (done) => {
     var pet = new Pet(fido);
