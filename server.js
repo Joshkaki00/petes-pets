@@ -16,9 +16,7 @@ const app = express();
 const mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/local', {
   useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useCreateIndex: true,
-  useFindAndModify: false
+  useUnifiedTopology: true
 });
 
 // view engine setup
