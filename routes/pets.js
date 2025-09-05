@@ -24,6 +24,13 @@ module.exports = (app) => {
       }) ;
   });
 
+  // SEARCH PET
+  app.get('/search', (req, res) => {
+    Pet.find().exec((err, pets) => {
+      res.render('pets-index', { pets: pets });    
+    });
+  });
+
   // SHOW PET
   app.get('/pets/:id', (req, res) => {
     Pet.findById(req.params.id).exec((err, pet) => {
