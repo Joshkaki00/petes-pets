@@ -10,10 +10,14 @@ if (document.querySelector('#new-pet')) {
 
         axios.post('/pets', pet)
             .then(function (response) {
-                window.location.replace(`/pets/${response.data.pet._id}`);
+                window.location.replace(`/pets/${response.data._id}`);
             })
+            // New Catch Code
             .catch(function (error) {
-                console.log(error);
+                const alert = document.getElementById('alert')
+                alert.classList.add('alert-warning');
+                alert.textContent = 'Oops, something went wrong saving your pet. Please check your information and try again.';
+                alert.style.display = 'block';
             });
     });
 }
