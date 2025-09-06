@@ -26,27 +26,24 @@ module.exports = (app) => {
 
   // SEARCH PET
   app.get('/search', (req, res) => {
-    term = new RegExp(req.query.term, 'i')  // case-insensitive regex
-
-    Pet.find({$or:[
-      {'name': term},
-      {'species': term}
-    ]}).exec((err, pets) => {
-      res.render('pets-index', { pets: pets });
-    })
-  });
-
-  // SHOW PET
-  app.get('/pets/:id', (req, res) => {
-    Pet.findById(req.params.id).exec((err, pet) => {
-      res.render('pets-show', { pet: pet });
-    });
-  });
-
-  // EDIT PET
-  app.get('/pets/:id/edit', (req, res) => {
-    Pet.findById(req.params.id).exec((err, pet) => {
-      res.render('pets-edit', { pet: pet });
+    const term = new RegExp(req.query.term, 'i');
+    const page = req.query.page || 1;
+    
+    Pet.paginate(
+      {
+        $or: [
+          { 'name': term },
+          { 'species': term }
+        ]
+      },
+      { page: page }
+    ).then((results) => {
+      res.render('pets-index', { 
+        pets: results.docs, 
+        pagesCount: results.pages, 
+        currentPage: page, 
+        term: req.query.term 
+      });
     });
   });
 
