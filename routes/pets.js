@@ -37,6 +37,20 @@ module.exports = (app) => {
     })
   })
 
+  // SHOW PET
+  app.get('/pets/:id', (req, res) => {
+    Pet.findById(req.params.id).exec((err, pet) => {
+      res.render('pets-show', { pet: pet });
+    });
+  });
+
+  // EDIT PET
+  app.get('/pets/:id/edit', (req, res) => {
+    Pet.findById(req.params.id).exec((err, pet) => {
+      res.render('pets-edit', { pet: pet });
+    });
+  });
+
   // SEARCH PET
   app.get('/search', (req, res) => {
     const term = new RegExp(req.query.term, 'i');
@@ -49,11 +63,11 @@ module.exports = (app) => {
           { 'species': term }
         ]
       },
-      { page: page }
+      { page: page, limit: 3 }
     ).then((results) => {
       res.render('pets-index', { 
         pets: results.docs, 
-        pagesCount: results.pages, 
+        pagesCount: results.totalPages, 
         currentPage: page, 
         term: req.query.term 
       });
