@@ -18,6 +18,23 @@ const PetSchema = new Schema({
   timestamps: true
 });
 
+// Add text index with weights
+
+PetSchema.index({ 
+  name: 'text', 
+  species: 'text', 
+  favoriteFood: 'text', 
+  description: 'text' 
+}, {
+  name: 'My text index', 
+  weights: {
+    name: 10,        // Highest priority
+    species: 4,      // High priority  
+    favoriteFood: 2, // Medium priority
+    description: 1   // Lowest priority
+  }
+});
+
 PetSchema.plugin(mongoosePaginate);
 
 module.exports = mongoose.model('Pet', PetSchema);
