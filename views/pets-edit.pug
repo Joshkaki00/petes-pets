@@ -20,7 +20,10 @@ block content
                     input.form-control(name="avatar" type="file" value=pet.picUrl)
                 .form-group
                     label Favorite Food
-                    input.form-control(name="favoriteFood" value=pet.favoriteFood)    
+                    input.form-control(name="favoriteFood" value=pet.favoriteFood)
+                .form-group
+                    label Price ($)
+                    input.form-control(name="price" type="number" step="0.01" min="0" value=pet.price required)
                 .form-group
                     label Description
                     textarea.form-control(name="description")= pet.description

@@ -114,8 +114,12 @@ module.exports = (app) => {
           console.log('Pet not found');
           return res.redirect(`/pets/${req.params.id}`);
         }
+        if (!pet.price || isNaN(pet.price)) {
+          console.log('Invalid pet price:', pet.price);
+          return res.redirect(`/pets/${req.params.id}`);
+        }
         const charge = stripe.charges.create({
-          amount: pet.price * 100,
+          amount: Math.round(pet.price * 100),
           currency: 'usd',
           description: `Purchased ${pet.name}, ${pet.species}`,
           source: token,

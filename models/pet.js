@@ -10,9 +10,10 @@ const PetSchema = new Schema({
   , species: { type: String, required: true }
   , picUrl: { type: String }
   , picUrlSq: { type: String }
-  , avatarUrl: { type: String, required: true }
+  , avatarUrl: { type: String }
   , favoriteFood: { type: String, required: true }
   , description: { type: String, minlength: 140, required: true }
+  , price: { type: Number, required: true, default: 0 }
 }, {
   timestamps: true
 });
