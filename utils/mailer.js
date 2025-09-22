@@ -15,6 +15,13 @@ const nodemailerMailgun = nodemailer.createTransport(mg(auth));
 
 // export our send mail function
 module.exports.sendMail = (user, req, res) => {
+    // Check if email environment variables are configured
+    if (!process.env.MAILGUN_API_KEY || !process.env.EMAIL_DOMAIN) {
+        console.log('Email functionality not configured - skipping email send');
+        console.log(`Pet purchased: ${user.petName} for $${user.amount} by ${user.email}`);
+        return res.redirect(`/pets/${req.params.id}`);
+    }
+
     // send an email to the user's email with a provided template
     nodemailerMailgun.sendMail({
         from: 'no-reply@example.com',
@@ -27,11 +34,11 @@ module.exports.sendMail = (user, req, res) => {
         }
     // One mail is sent, redirect to the purchased pet's page
     }).then(info => {
-        console.log('Response: ' + info);
+        console.log('Email sent successfully: ' + info);
         res.redirect(`/pets/${req.params.id}`);
     // Catch error and redirect to the purchased pet's page
     }).catch(err => {
-        console.log('Error: ' + err);
+        console.log('Error sending email: ' + err);
         res.redirect(`/pets/${req.params.id}`);
     });
 }

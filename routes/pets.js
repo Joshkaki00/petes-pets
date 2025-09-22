@@ -1,5 +1,6 @@
 // MODELS
 const Pet = require('../models/pet');
+const mailer = require('../utils/mailer');
 
 // PET ROUTES
 module.exports = (app) => {
