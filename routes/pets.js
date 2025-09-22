@@ -14,41 +14,56 @@ module.exports = (app) => {
   // CREATE PET
   app.post('/pets', upload.single('avatar'), (req, res, next) => {
     var pet = new Pet(req.body);
-    pet.save(function (err) {
-      if (req.file) {
-        // Upload the images
-        client.upload(req.file.path, {}, function (err, versions, meta) {
-          if (err) { return res.status(400).send({ err: err }) };
+    pet.save()
+      .then(() => {
+        if (req.file) {
+          // Upload the images
+          client.upload(req.file.path, {}, function (err, versions, meta) {
+            if (err) { return res.status(400).send({ err: err }) };
 
-          // Pop off the -square and -standard and just use the one URL to grab the image
-          versions.forEach(function (image) {
-            var urlArray = image.url.split('-');
-            urlArray.pop();
-            var url = urlArray.join('-');
-            pet.avatarUrl = url;
-            pet.save();
+            // Pop off the -square and -standard and just use the one URL to grab the image
+            versions.forEach(function (image) {
+              var urlArray = image.url.split('-');
+              urlArray.pop();
+              var url = urlArray.join('-');
+              pet.avatarUrl = url;
+              pet.save();
+            });
+
+            res.send({ pet: pet });
           });
-
+        } else {
           res.send({ pet: pet });
-        });
-      } else {
-        res.send({ pet: pet });
-      }
-    })
+        }
+      })
+      .catch((err) => {
+        console.error('Error saving pet:', err);
+        res.status(400).send({ err: err });
+      });
   })
 
   // SHOW PET
   app.get('/pets/:id', (req, res) => {
-    Pet.findById(req.params.id).exec((err, pet) => {
-      res.render('pets-show', { pet: pet });
-    });
+    Pet.findById(req.params.id).exec()
+      .then((pet) => {
+        res.render('pets-show', { pet: pet });
+      })
+      .catch((err) => {
+        console.error('Error finding pet:', err);
+        res.status(404).render('error', { message: 'Pet not found', error: err });
+      });
   });
 
   // EDIT PET
   app.get('/pets/:id/edit', (req, res) => {
-    Pet.findById(req.params.id).exec((err, pet) => {
-      res.render('pets-edit', { pet: pet });
-    });
+    Pet.findById(req.params.id).exec()
+      .then((pet) => {
+        res.render('pets-edit', { pet: pet });
+      })
+      .catch((err) => {
+        console.error('Error finding pet for edit:', err);
+        res.status(404).render('error', { message: 'Pet not found', error: err });
+      });
   });
 
   // SEARCH PET
@@ -93,37 +108,47 @@ module.exports = (app) => {
     const token = req.body.stripeToken;
     let petId = req.body.petId || req.params.id;
 
-    Pet.findById(petId).exec((err, pet) => {
-      if(err) {
+    Pet.findById(petId).exec()
+      .then((pet) => {
+        if (!pet) {
+          console.log('Pet not found');
+          return res.redirect(`/pets/${req.params.id}`);
+        }
+        const charge = stripe.charges.create({
+          amount: pet.price * 100,
+          currency: 'usd',
+          description: `Purchased ${pet.name}, ${pet.species}`,
+          source: token,
+        }).then((chg) => {
+          // Convert the amount back to dollars for ease in displaying in the template
+          const user = {
+            email: req.body.stripeEmail,
+            amount: chg.amount / 100,
+            petName: pet.name
+          };
+          // Call our mail handler to manage sending emails
+          mailer.sendMail(user, req, res);
+        })
+        .catch(err => {
+          console.log('Error: ' + err);
+        });
+      })
+      .catch((err) => {
         console.log('Error: ' + err);
         res.redirect(`/pets/${req.params.id}`);
-      }
-      const charge = stripe.charges.create({
-        amount: pet.price * 100,
-        currency: 'usd',
-        description: `Purchased ${pet.name}, ${pet.species}`,
-        source: token,
-      }).then((chg) => {
-        // Convert the amount back to dollars for ease in displaying in the template
-        const user = {
-          email: req.body.stripeEmail,
-          amount: chg.amount / 100,
-          petName: pet.name
-        };
-        // Call our mail handler to manage sending emails
-        mailer.sendMail(user, req, res);
-      })
-      .catch(err => {
-        console.log('Error: ' + err);
       });
-    })
   });
 
   // DELETE PET
   app.delete('/pets/:id', (req, res) => {
-    Pet.findByIdAndRemove(req.params.id).exec((err, pet) => {
-      return res.redirect('/')
-    });
+    Pet.findByIdAndDelete(req.params.id).exec()
+      .then((pet) => {
+        return res.redirect('/');
+      })
+      .catch((err) => {
+        console.error('Error deleting pet:', err);
+        return res.redirect('/');
+      });
   });
 }
 

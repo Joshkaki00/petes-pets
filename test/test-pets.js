@@ -19,9 +19,13 @@ chai.use(chaiHttp);
 describe('Pets', ()  => {
 
   after(() => { 
-    Pet.deleteMany({$or: [{name: 'Norman'}, {name: 'Spider'}] }).exec((err, pets) => {
-      console.log(pets, `Deleted ${pets.n} documents`)
-    }) 
+    Pet.deleteMany({$or: [{name: 'Norman'}, {name: 'Spider'}] }).exec()
+      .then((pets) => {
+        console.log(pets, `Deleted ${pets.deletedCount} documents`)
+      })
+      .catch((err) => {
+        console.error('Error deleting test pets:', err);
+      });
   });
 
   // TEST INDEX
