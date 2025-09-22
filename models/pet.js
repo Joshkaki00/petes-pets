@@ -18,15 +18,14 @@ const PetSchema = new Schema({
   timestamps: true
 });
 
-// Add text index with weights
-
+// Add text index with weights for full-text search
 PetSchema.index({ 
   name: 'text', 
   species: 'text', 
   favoriteFood: 'text', 
   description: 'text' 
 }, {
-  name: 'My text index', 
+  name: 'pets_text_index', 
   weights: {
     name: 10,        // Highest priority
     species: 4,      // High priority  

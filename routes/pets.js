@@ -112,14 +112,17 @@ module.exports = (app) => {
         )
         .sort({ score : { $meta : 'textScore' } })
         .limit(20)
-        .exec(function(err, pets) {
-          if (err) { return res.status(400).send(err) }
-
+        .exec()
+        .then((pets) => {
           if (req.header('Content-Type') == 'application/json') {
             return res.json({ pets: pets });
           } else {
             return res.render('pets-index', { pets: pets, term: req.query.term });
           }
+        })
+        .catch((err) => {
+          console.error('Search error:', err);
+          return res.status(400).send(err);
         });
   });
 
